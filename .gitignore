@@ -1,0 +1,11 @@
+venv/
+__pycache__/
+*.pyc
+.quarto/
+_site/
+.ipynb_checkpoints/
+*.egg-info/
+.env
+
+/.quarto/
+**/*.quarto_ipynb

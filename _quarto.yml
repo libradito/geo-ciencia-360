@@ -1,0 +1,10 @@
+project:
+  type: website
+
+format:
+  dashboard:
+    theme: cosmo
+    css: styles.css
+
+execute:
+  cache: false

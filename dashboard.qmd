@@ -55,7 +55,7 @@ def make_gauge(data, title_suffix=""):
             threshold=dict(line=dict(color="red", width=3), thickness=0.8, value=brecha),
         )
     ))
-    fig.update_layout(height=250, margin=dict(t=60, b=20, l=30, r=30))
+    fig.update_layout(height=None, autosize=True, margin=dict(t=40, b=10, l=20, r=20))
     return fig
 
 # ── Helper: Horizontal comparison bar ──────────────────────────────
@@ -84,8 +84,9 @@ def make_comparison(data, indicator_name="Indicador"):
     ))
     fig.update_layout(
         xaxis_title=indicator_name,
-        height=280, template="plotly_white",
-        margin=dict(t=10, b=40, l=10, r=60),
+        height=None, autosize=True,
+        template="plotly_white",
+        margin=dict(t=10, b=30, l=10, r=50),
         xaxis=dict(showgrid=True, gridcolor="#eee"),
         yaxis=dict(tickfont=dict(size=14, family="Arial Black")),
     )
@@ -100,19 +101,22 @@ def make_donut(chamula_val, label="Pobreza Extrema"):
         labels=[label, "Resto de la población"],
         values=[chamula_val, rest],
         hole=0.6,
-        marker=dict(colors=["#dc3545", "#e9ecef"]),
-        textinfo="percent",
-        textfont=dict(size=16),
-        hoverinfo="label+value",
+        marker=dict(colors=["#dc3545", "#dee2e6"]),
+        textinfo="percent+label",
+        textposition="inside",
+        textfont=dict(size=13, family="Arial Black"),
+        insidetextorientation="horizontal",
+        hoverinfo="label+value+percent",
     ))
     fig.add_annotation(
         text=f"<b>{chamula_val:.1f}%</b>", x=0.5, y=0.5,
-        font=dict(size=28, color="#dc3545"), showarrow=False,
+        font=dict(size=24, color="#dc3545"), showarrow=False,
     )
     fig.update_layout(
-        height=280, margin=dict(t=10, b=10, l=10, r=10),
+        height=None, autosize=True,
+        margin=dict(t=10, b=10, l=10, r=10),
         showlegend=True,
-        legend=dict(orientation="h", yanchor="bottom", y=-0.15, x=0.5, xanchor="center", font=dict(size=11)),
+        legend=dict(orientation="h", yanchor="bottom", y=-0.15, x=0.5, xanchor="center", font=dict(size=13)),
     )
     return fig
 ```
@@ -197,27 +201,27 @@ make_gauge(data_ods1)
 #| title: "Ubicación — San Juan Chamula, Chiapas"
 
 display(HTML('''
-<div style="text-align:center; padding:15px;">
-  <div style="background:linear-gradient(135deg,#1a1a2e,#16213e); border-radius:12px; padding:20px; color:white;">
-    <h3 style="margin:0 0 10px 0; color:#ff6b6b;">📍 San Juan Chamula</h3>
-    <p style="margin:5px 0; font-size:1.1em;">Municipio indígena Tsotsil en los Altos de Chiapas</p>
-    <hr style="border-color:#333; margin:12px 0;">
-    <div style="display:flex; justify-content:space-around; flex-wrap:wrap; gap:10px;">
-      <div>
-        <div style="font-size:1.8em; font-weight:800; color:#ff6b6b;">102,970</div>
-        <div style="font-size:0.85em; opacity:0.8;">Habitantes</div>
+<div class="location-card">
+  <div class="location-card__inner">
+    <h3 class="location-card__title">San Juan Chamula</h3>
+    <p class="location-card__subtitle">Municipio indígena Tsotsil en los Altos de Chiapas</p>
+    <hr class="location-card__divider">
+    <div class="location-card__stats">
+      <div class="location-card__stat">
+        <div class="location-card__stat-value location-card__stat-value--red">102,970</div>
+        <div class="location-card__stat-label">Habitantes</div>
       </div>
-      <div>
-        <div style="font-size:1.8em; font-weight:800; color:#ffd93d;">96.3%</div>
-        <div style="font-size:0.85em; opacity:0.8;">En pobreza</div>
+      <div class="location-card__stat">
+        <div class="location-card__stat-value location-card__stat-value--yellow">96.3%</div>
+        <div class="location-card__stat-label">En pobreza</div>
       </div>
-      <div>
-        <div style="font-size:1.8em; font-weight:800; color:#6bcb77;">Tsotsil</div>
-        <div style="font-size:0.85em; opacity:0.8;">Lengua indígena</div>
+      <div class="location-card__stat">
+        <div class="location-card__stat-value location-card__stat-value--green">Tsotsil</div>
+        <div class="location-card__stat-label">Lengua indígena</div>
       </div>
     </div>
-    <hr style="border-color:#333; margin:12px 0;">
-    <p style="margin:0; font-size:0.9em; opacity:0.7;">Lat: 16.784° N &nbsp;|&nbsp; Lon: 92.689° W &nbsp;|&nbsp; CVEGEO: 07023</p>
+    <hr class="location-card__divider">
+    <p class="location-card__coords">Lat: 16.784° N &nbsp;|&nbsp; Lon: 92.689° W &nbsp;|&nbsp; CVEGEO: 07023</p>
   </div>
 </div>
 '''))
@@ -486,7 +490,8 @@ fig_radar.update_layout(
     ),
     showlegend=True,
     legend=dict(orientation="h", yanchor="bottom", y=-0.2, x=0.5, xanchor="center", font=dict(size=13)),
-    height=420, margin=dict(t=30, b=60, l=60, r=60),
+    height=None, autosize=True,
+    margin=dict(t=20, b=40, l=40, r=40),
 )
 fig_radar.show()
 ```
@@ -519,14 +524,15 @@ fig_summary.add_hline(y=1.0, line_dash="dash", line_color="#999",
                        annotation_position="top right")
 fig_summary.update_layout(
     yaxis_title="Brecha (veces peor que el promedio nacional)",
-    height=350, template="plotly_white",
-    margin=dict(t=20, b=40),
+    height=None, autosize=True,
+    template="plotly_white",
+    margin=dict(t=20, b=30),
     xaxis=dict(tickfont=dict(size=13)),
 )
 fig_summary.show()
 ```
 
-# Auditoría
+# Auditoría {scrolling="true"}
 
 ## Row
 

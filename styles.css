@@ -55,3 +55,265 @@ details summary:hover {
   border: 1px solid #ffc107;
   color: #856404;
 }
+
+/* ─── Value Boxes ────────────────────────────────────────────── */
+
+/* Card: clean white, subtle shadow, no colored border */
+.bslib-value-box {
+  border-radius: 12px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
+  border: 1px solid #f1f5f9 !important;
+  overflow: hidden;
+}
+
+.bslib-value-box.bg-danger,
+.bslib-value-box.bg-warning,
+.bslib-value-box.bg-info,
+.bslib-value-box.bg-primary,
+.bslib-value-box.bg-success {
+  background-color: #ffffff !important;
+}
+
+/* Icon circle: colored soft bg, centered icon */
+.bslib-value-box .value-box-showcase {
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  max-width: 44px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 0 0 auto !important;
+  align-self: center;
+}
+
+.bslib-value-box .value-box-showcase i {
+  font-size: 1.2em;
+}
+
+/* Per-variant icon circle background + icon color */
+.bslib-value-box.bg-danger  .value-box-showcase { background: rgba(239, 68, 68, 0.12); }
+.bslib-value-box.bg-warning .value-box-showcase { background: rgba(245, 158, 11, 0.12); }
+.bslib-value-box.bg-info    .value-box-showcase { background: rgba(139, 92, 246, 0.12); }
+.bslib-value-box.bg-primary .value-box-showcase { background: rgba(59, 130, 246, 0.12); }
+.bslib-value-box.bg-success .value-box-showcase { background: rgba(34, 197, 94, 0.12); }
+
+.bslib-value-box.bg-danger  .value-box-showcase i { color: #e7d6d6; }
+.bslib-value-box.bg-warning .value-box-showcase i { color: #eeddca; }
+.bslib-value-box.bg-info    .value-box-showcase i { color: #cbc0dd; }
+.bslib-value-box.bg-primary .value-box-showcase i { color: #d6ddeb; }
+.bslib-value-box.bg-success .value-box-showcase i { color: #bae0c8; }
+
+/* Value: dark, bold, the hero element */
+.bslib-value-box .value-box-value {
+  color: #111827 !important;
+  font-weight: 800;
+  font-size: 1.5em;
+}
+
+/* Title: subtle uppercase label */
+.bslib-value-box .value-box-title {
+  color: #ffffff !important;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.95em;
+  opacity: 1;
+}
+
+/* ─── Location Card ──────────────────────────────────────────── */
+
+/* Override bslib fill behavior — stop the card from collapsing */
+.location-card.html-fill-item {
+  flex: 0 0 auto !important;
+  min-height: auto !important;
+  height: auto !important;
+}
+
+.location-card.html-fill-container,
+.location-card__inner.html-fill-container {
+  display: block !important;
+  min-height: auto !important;
+}
+
+.location-card .html-fill-item {
+  flex: 0 0 auto !important;
+  min-height: auto !important;
+}
+
+/* Text elements must never collapse or clip */
+.location-card__title,
+.location-card__subtitle,
+.location-card__stat-value,
+.location-card__stat-label,
+.location-card__coords {
+  min-height: auto !important;
+  overflow: visible !important;
+  white-space: normal !important;
+}
+
+.location-card__divider {
+  flex-shrink: 0;
+}
+
+.location-card {
+  text-align: center;
+  padding: clamp(4px, 1vw, 8px);
+  overflow-y: auto;
+}
+
+.location-card__inner {
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  padding: clamp(10px, 2vw, 16px);
+  color: white;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.location-card__title {
+  margin: 0 0 4px 0;
+  color: #ff6b6b;
+  font-size: clamp(0.95em, 2vw, 1.15em);
+}
+
+.location-card__subtitle {
+  margin: 2px 0;
+  font-size: clamp(0.75em, 1.5vw, 0.9em);
+  opacity: 0.85;
+}
+
+.location-card__divider {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin: 8px 0;
+}
+
+.location-card__stats,
+.location-card__stats.html-fill-container {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: clamp(8px, 2vw, 16px);
+}
+
+.location-card__stat,
+.location-card__stat.html-fill-container {
+  display: block !important;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: clamp(6px, 1vw, 10px) clamp(8px, 1.5vw, 14px);
+  min-width: 80px;
+  flex: 1 1 0 !important;
+}
+
+.location-card__stat-value {
+  font-size: clamp(1em, 2vw, 1.4em);
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.location-card__stat-value--red { color: #ff6b6b; }
+.location-card__stat-value--yellow { color: #ffd93d; }
+.location-card__stat-value--green { color: #6bcb77; }
+
+.location-card__stat-label {
+  font-size: clamp(0.65em, 1vw, 0.78em);
+  opacity: 0.75;
+  margin-top: 2px;
+}
+
+.location-card__coords {
+  margin: 0;
+  font-size: clamp(0.65em, 1vw, 0.8em);
+  opacity: 0.6;
+  letter-spacing: 0.02em;
+}
+
+/* ─── Responsive: Tablet ─────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* ODS page rows: auto height + vertical scroll */
+  .dashboard-page > .bslib-grid {
+    grid-template-rows: auto auto auto !important;
+    overflow-y: auto;
+  }
+
+  /* Value boxes: 5 cols → 3 cols */
+  .dashboard-page > .bslib-grid > .bslib-grid:first-child {
+    grid-template-columns: repeat(3, 1fr) !important;
+    grid-auto-rows: minmax(3em, auto) !important;
+  }
+
+  /* Chart rows: stack vertically */
+  .dashboard-page > .bslib-grid > .bslib-grid:nth-child(2),
+  .dashboard-page > .bslib-grid > .bslib-grid:nth-child(3) {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Plotly charts: ensure minimum height when container is auto */
+  .plotly-graph-div {
+    min-height: 220px;
+  }
+
+  /* Audit table: horizontal scroll */
+  .audit-table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .audit-table th,
+  .audit-table td {
+    font-size: 0.78rem;
+    padding: 6px 8px;
+    white-space: nowrap;
+  }
+}
+
+/* ─── Responsive: Phone ──────────────────────────────────────── */
+@media (max-width: 576px) {
+  /* Value boxes: 3 cols → 2 cols */
+  .dashboard-page > .bslib-grid > .bslib-grid:first-child {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* All ODS page content: flex-column stack */
+  .dashboard-page > .bslib-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px;
+    overflow-y: auto;
+  }
+
+  /* Location card: stack stats vertically on phone */
+  .location-card__stats,
+  .location-card__stats.html-fill-container {
+    flex-direction: column !important;
+    align-items: stretch;
+  }
+
+  .location-card__stat {
+    min-width: unset;
+  }
+
+  /* Plotly charts: smaller minimum on phone */
+  .plotly-graph-div {
+    min-height: 200px;
+  }
+
+  /* Audit table: compress further */
+  .audit-table {
+    font-size: 0.72rem;
+  }
+
+  .audit-table code {
+    font-size: 0.65rem;
+    word-break: break-all;
+  }
+
+  .audit-table th,
+  .audit-table td {
+    padding: 4px 6px;
+  }
+}

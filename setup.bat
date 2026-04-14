@@ -79,9 +79,13 @@ echo     venv\Scripts\activate
 echo.
 echo   To render the dashboard:
 echo     quarto render dashboard.qmd
+echo     python cache_bust.py
 echo.
 echo   To preview live:
 echo     quarto preview dashboard.qmd
+echo.
+echo   To deploy to GitHub Pages:
+echo     deploy.bat
 echo.
 echo   To refresh World Bank data (annually):
 echo     python scripts\download_wb_cache.py

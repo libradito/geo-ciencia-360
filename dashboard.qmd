@@ -31,6 +31,7 @@ NEON_RED    = "#dc2626"   # Chamula crisis
 HEAL_GREEN  = "#16a34a"   # National averages / success
 NEON_ORANGE = "#ea580c"   # Intense orange / moderate warning
 ALERT_YEL   = "#ca8a04"   # Alert yellow
+GENDER_PINK = "#ec4899"   # ODS-5 Género accent
 
 # ── Shared gauge steps: green → yellow → red crisis zone ────────────
 GAUGE_STEPS_PCT = [
@@ -401,11 +402,12 @@ def make_ods_comparison_bar():
 # ═══════════════════════════════════════════════════════════════════════
 # HELPER: Brecha gauge (0-5x ratio) — used in ODS 1/4/5/8 pages
 # ═══════════════════════════════════════════════════════════════════════
-def make_gauge(data, title_suffix=""):
+def make_gauge(data, title_suffix="", green_color=None):
     brecha = data.get("brecha") if data else None
     if brecha is None:
         return go.Figure()
-    color = NEON_RED if brecha > 2 else NEON_ORANGE if brecha > 1.5 else HEAL_GREEN
+    gc = green_color or HEAL_GREEN
+    color = NEON_RED if brecha > 2 else NEON_ORANGE if brecha > 1.5 else gc
     # Gradient arc steps for the brecha gauge
     brecha_steps = [
         dict(range=[0,   0.5], color="rgba(22,163,74,0.10)"),
@@ -457,7 +459,7 @@ def make_gauge(data, title_suffix=""):
 # ═══════════════════════════════════════════════════════════════════════
 # HELPER: Horizontal comparison bar — used in ODS 1/4/5/8 pages
 # ═══════════════════════════════════════════════════════════════════════
-def make_comparison(data, indicator_name="Indicador"):
+def make_comparison(data, indicator_name="Indicador", green_color=None):
     if not data:
         return go.Figure()
 
@@ -466,7 +468,7 @@ def make_comparison(data, indicator_name="Indicador"):
         "Chamula": NEON_RED,
         "México":  NEON_ORANGE,
         "LATAM":   "#0284c7",
-        "Mundo":   HEAL_GREEN,
+        "Mundo":   green_color or HEAL_GREEN,
     }
 
     for key, label in [("world","Mundo"),("latam","LATAM"),("nacional","México"),("chamula","Chamula")]:
@@ -845,14 +847,14 @@ make_donut(data_ods5["chamula"] if data_ods5 else None, "Sin Seguridad Social")
 
 ```{python}
 #| title: "Comparativa: Chamula vs México vs LATAM vs Mundo"
-make_comparison(data_ods5, "Indicador de Género (%)")
+make_comparison(data_ods5, "Indicador de Género (%)", green_color=GENDER_PINK)
 ```
 
 ## Row {height=35%}
 
 ```{python}
 #| title: "Brecha: ¿Cuántas veces peor está Chamula?"
-make_gauge(data_ods5)
+make_gauge(data_ods5, green_color=GENDER_PINK)
 ```
 
 # ODS 8 — Trabajo {icon="bi-briefcase-fill"}
@@ -925,154 +927,6 @@ make_comparison(data_ods8, "Trabajo Decente (%)")
 ```{python}
 #| title: "Brecha: ¿Cuántas veces peor está Chamula?"
 make_gauge(data_ods8)
-```
-
-# Resumen {scrolling=true icon="bi-bar-chart-fill"}
-
-## Row {height=1200px}
-
-```{python}
-#| title: "Radar — Chamula vs Promedio Nacional en los 4 ODS"
-
-categories = ["ODS 1<br>Pobreza", "ODS 4<br>Educación", "ODS 5<br>Género", "ODS 8<br>Trabajo"]
-
-chamula_vals = [
-    data_ods1["chamula"] if data_ods1 and data_ods1.get("chamula") else 0,
-    data_ods4["chamula"] if data_ods4 and data_ods4.get("chamula") else 0,
-    data_ods5["chamula"] if data_ods5 and data_ods5.get("chamula") else 0,
-    data_ods8["chamula"] if data_ods8 and data_ods8.get("chamula") else 0,
-]
-
-nacional_vals = [
-    data_ods1["nacional"] if data_ods1 and data_ods1.get("nacional") else 0,
-    data_ods4["nacional"] if data_ods4 and data_ods4.get("nacional") else 0,
-    data_ods5["nacional"] if data_ods5 and data_ods5.get("nacional") else 0,
-    data_ods8["nacional"] if data_ods8 and data_ods8.get("nacional") else 0,
-]
-
-fig_radar = go.Figure()
-
-# ── Chamula trace ────────────────────────────────────────────────────
-fig_radar.add_trace(go.Scatterpolar(
-    r=chamula_vals + [chamula_vals[0]],
-    theta=categories + [categories[0]],
-    fill="toself",
-    fillcolor="rgba(220,38,38,0.14)",
-    line=dict(color=NEON_RED, width=2.5),
-    mode="lines+markers+text",
-    marker=dict(
-        size=9, color=NEON_RED,
-        line=dict(color="#ffffff", width=2),
-    ),
-    text=[f"<b>{v:.1f}%</b>" for v in chamula_vals] + [""],
-    textposition="top center",
-    textfont=dict(size=14, color=NEON_RED, family="Arial Black"),
-    name="Chamula",
-    hovertemplate="<b>Chamula</b><br>%{theta}: %{r:.1f}%<extra></extra>",
-))
-
-# ── Nacional trace ───────────────────────────────────────────────────
-fig_radar.add_trace(go.Scatterpolar(
-    r=nacional_vals + [nacional_vals[0]],
-    theta=categories + [categories[0]],
-    fill="toself",
-    fillcolor="rgba(22,163,74,0.10)",
-    line=dict(color=HEAL_GREEN, width=2, dash="dot"),
-    mode="lines+markers+text",
-    marker=dict(
-        size=8, color=HEAL_GREEN,
-        line=dict(color="#ffffff", width=2),
-    ),
-    text=[f"<b>{v:.1f}%</b>" for v in nacional_vals] + [""],
-    textposition="bottom center",
-    textfont=dict(size=13, color=HEAL_GREEN, family="Arial Black"),
-    name="Promedio Nacional",
-    hovertemplate="<b>Nacional</b><br>%{theta}: %{r:.1f}%<extra></extra>",
-))
-
-fig_radar.update_layout(
-    polar=dict(
-        domain=dict(x=[0.02, 0.98], y=[0.02, 0.96]),
-        radialaxis=dict(
-            visible=True,
-            range=[0, 100],
-            ticksuffix="%",
-            nticks=6,
-            showline=True,
-            linecolor="#e2e8f0",
-            gridcolor="#e2e8f0",
-            gridwidth=1,
-            tickcolor="#94a3b8",
-            tickfont=dict(size=11, color="#94a3b8"),
-        ),
-        angularaxis=dict(
-            tickfont=dict(size=14, color="#1e293b", family="Arial Black"),
-            rotation=90,
-            direction="clockwise",
-            linecolor="#e2e8f0",
-            gridcolor="#e2e8f0",
-        ),
-        bgcolor="rgba(241,245,249,0.4)",
-    ),
-    showlegend=True,
-    legend=dict(
-        orientation="h",
-        yanchor="bottom", y=-0.05,
-        x=0.5, xanchor="center",
-        font=dict(size=12, color="#475569"),
-        entrywidth=140,
-        bgcolor="rgba(255,255,255,0.7)",
-        bordercolor="#e2e8f0",
-        borderwidth=1,
-    ),
-    height=None, autosize=True,
-    template="plotly_white",
-    paper_bgcolor="rgba(0,0,0,0)",
-    plot_bgcolor="rgba(0,0,0,0)",
-    margin=dict(t=10, b=70, l=10, r=10),
-)
-fig_radar.show()
-```
-
-## Row {height=480px}
-
-```{python}
-#| title: "Resumen de Brechas por ODS"
-
-ods_names = ["ODS 1\nPobreza", "ODS 4\nEducación", "ODS 5\nGénero", "ODS 8\nTrabajo"]
-brechas = [
-    data_ods1["brecha"] if data_ods1 and data_ods1.get("brecha") else 0,
-    data_ods4["brecha"] if data_ods4 and data_ods4.get("brecha") else 0,
-    data_ods5["brecha"] if data_ods5 and data_ods5.get("brecha") else 0,
-    data_ods8["brecha"] if data_ods8 and data_ods8.get("brecha") else 0,
-]
-bar_colors = [NEON_RED if b > 2 else NEON_ORANGE if b > 1.5 else HEAL_GREEN for b in brechas]
-
-fig_summary = go.Figure()
-fig_summary.add_trace(go.Bar(
-    x=ods_names, y=brechas,
-    marker_color=bar_colors,
-    text=[f"<b>{b:.1f}x</b>" for b in brechas],
-    textposition="outside",
-    textfont=dict(size=16, color="#1e293b"),
-))
-fig_summary.add_hline(
-    y=1.0, line_dash="dash", line_color="#94a3b8",
-    annotation_text="Promedio nacional = 1.0x",
-    annotation_position="top right",
-    annotation_font_color="#64748b",
-)
-fig_summary.update_layout(
-    yaxis_title="Brecha (veces peor que el promedio nacional)",
-    height=None, autosize=True,
-    template="plotly_white",
-    paper_bgcolor="rgba(0,0,0,0)",
-    plot_bgcolor="rgba(0,0,0,0)",
-    margin=dict(t=20, b=30),
-    xaxis=dict(tickfont=dict(size=13, color="#1e293b")),
-    yaxis=dict(gridcolor="#e2e8f0"),
-)
-fig_summary.show()
 ```
 
 # Auditoría {scrolling="true" icon="bi-shield-check"}

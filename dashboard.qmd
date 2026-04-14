@@ -599,7 +599,7 @@ display(HTML('''
       <span class="ods-badge">ODS 5 &middot; G&#233;nero</span>
       <span class="ods-badge">ODS 8 &middot; Trabajo</span>
     </div>
-    <a href="https://www.empoderandoarte.com/" target="_blank" rel="noopener noreferrer" class="neon-button">Aplicar Apoyo Social</a>
+    <a href="https://www.empoderandoarte.com/" target="_blank" rel="noopener noreferrer" class="neon-button">Visita Empoderando Arte</a>
   </div>
 </div>
 '''))

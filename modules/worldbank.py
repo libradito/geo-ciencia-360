@@ -6,7 +6,13 @@ Nota: La API del Banco Mundial es ABIERTA (no requiere token).
 Referencia ONU: https://unstats.un.org/sdgs/ designa al Banco Mundial como custodio ODS.
 """
 
+import csv
+import os
+
 import requests
+
+# ─── Ruta al cache local ──────────────────────────────────────────────
+_CACHE_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "wb_cache.csv")
 
 # ─── Mapping ODS → código de indicador World Bank ────────────────────
 WB_MAP = {
@@ -107,9 +113,31 @@ def get_world_average(indicator, date="2018:2022"):
     return fetch_wb_indicator("WLD", indicator, date)
 
 
+def _load_cache():
+    """
+    Lee data/wb_cache.csv y retorna un dict {indicator: {"LAC": float, "WLD": float}}.
+    Retorna {} si el archivo no existe o no se puede leer.
+    """
+    try:
+        path = os.path.abspath(_CACHE_PATH)
+        if not os.path.isfile(path):
+            return {}
+        cache = {}
+        with open(path, newline="", encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                lac = float(row["LAC"]) if row.get("LAC") not in (None, "", "None") else None
+                wld = float(row["WLD"]) if row.get("WLD") not in (None, "", "None") else None
+                cache[row["indicator"]] = {"LAC": lac, "WLD": wld}
+        return cache
+    except Exception as e:
+        print(f"AVISO World Bank cache: {e}")
+        return {}
+
+
 def get_worldbank_data(ods):
     """
     Función principal: retorna (latam, world) para un ODS.
+    Lee de data/wb_cache.csv si está disponible; si no, consulta la API.
     Si no existe indicador, retorna (None, None).
     """
     indicator = WB_MAP.get(ods)
@@ -117,8 +145,17 @@ def get_worldbank_data(ods):
         return None, None
 
     try:
-        latam = get_latam_average(indicator)
-        world = get_world_average(indicator)
+        cache = _load_cache()
+        entry = cache.get(indicator, {})
+        latam = entry.get("LAC")
+        world = entry.get("WLD")
+
+        # Respaldo a API solo para los valores que falten en el cache
+        if latam is None:
+            latam = get_latam_average(indicator)
+        if world is None:
+            world = get_world_average(indicator)
+
         return latam, world
     except Exception as e:
         print(f"ERROR World Bank get_worldbank_data: {e}")

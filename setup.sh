@@ -71,6 +71,16 @@ else:
     print('   ❌ Could not load CONEVAL data. Check the data/ folder.')
 "
 
+# ── Step 9: Download World Bank cache ────────────────────────────────
+echo ""
+if [ -f "data/wb_cache.csv" ]; then
+    echo "✅ World Bank cache already exists. Skipping download."
+    echo "   To refresh: python scripts/download_wb_cache.py"
+else
+    echo "🌐 Downloading World Bank indicators (LAC + World)..."
+    python3 scripts/download_wb_cache.py
+fi
+
 # ── Done ─────────────────────────────────────────────────────────────
 echo ""
 echo "════════════════════════════════════════════════════════════"
@@ -84,4 +94,7 @@ echo "    quarto render dashboard.qmd"
 echo ""
 echo "  To preview live:"
 echo "    quarto preview dashboard.qmd"
+echo ""
+echo "  To refresh World Bank data (annually):"
+echo "    python scripts/download_wb_cache.py"
 echo "════════════════════════════════════════════════════════════"

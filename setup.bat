@@ -59,6 +59,16 @@ echo.
 echo  Running quick data test...
 python -c "from modules.coneval import load_coneval_data, get_chamula_value; df = load_coneval_data(); val = get_chamula_value(df, 'pobreza_e') if df is not None else None; print(f'   Chamula pobreza extrema: {val}%%') if val else print('   Check data folder')"
 
+REM ── Step 9: Download World Bank cache ─────────────────────────────
+echo.
+if exist "data\wb_cache.csv" (
+    echo  World Bank cache already exists. Skipping download.
+    echo    To refresh: python scripts\download_wb_cache.py
+) else (
+    echo  Downloading World Bank indicators ^(LAC + World^)...
+    python scripts\download_wb_cache.py
+)
+
 REM ── Done ───────────────────────────────────────────────────────────
 echo.
 echo ============================================================
@@ -72,6 +82,9 @@ echo     quarto render dashboard.qmd
 echo.
 echo   To preview live:
 echo     quarto preview dashboard.qmd
+echo.
+echo   To refresh World Bank data (annually):
+echo     python scripts\download_wb_cache.py
 echo ============================================================
 echo.
 pause

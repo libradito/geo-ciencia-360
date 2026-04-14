@@ -561,7 +561,7 @@ details summary:hover {
 }
 
 .cta-card__brand {
-  font-size: clamp(1.2em, 3.2vw, 2.1em);
+  font-size: clamp(0.9em, 2.2vw, 1.5em);
   font-weight: 900;
   letter-spacing: 0.14em;
   text-transform: uppercase;

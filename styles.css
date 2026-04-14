@@ -802,3 +802,70 @@ details summary:hover {
     font-size: 0.85em;
   }
 }
+
+/* ─── Bslib Fullscreen Modal ─────────────────────────────────────── */
+
+/* Overlay backdrop */
+.bslib-full-screen-portal {
+  z-index: 1080;
+  background: rgba(15, 23, 42, 0.65) !important;
+  backdrop-filter: blur(4px);
+}
+
+/* Card in fullscreen: fill the viewport */
+.bslib-full-screen-portal > .bslib-card,
+.bslib-card.bslib-full-screen {
+  width: 94vw !important;
+  height: 92vh !important;
+  max-width: 94vw !important;
+  max-height: 92vh !important;
+  margin: auto !important;
+  top: 4vh !important;
+  left: 3vw !important;
+  border-radius: 14px !important;
+  box-shadow:
+    0 0 0 1px rgba(203, 213, 225, 0.5),
+    0 24px 64px rgba(0, 0, 0, 0.28) !important;
+}
+
+/* Card body: fill remaining height after header */
+.bslib-full-screen-portal .card-body,
+.bslib-card.bslib-full-screen .card-body {
+  height: calc(92vh - 52px) !important;
+  overflow: hidden;
+  padding: 8px !important;
+}
+
+/* Plotly figure: stretch to fill the card body */
+.bslib-full-screen-portal .js-plotly-plot,
+.bslib-full-screen-portal .plotly,
+.bslib-full-screen-portal .plot-container,
+.bslib-card.bslib-full-screen .js-plotly-plot,
+.bslib-card.bslib-full-screen .plotly,
+.bslib-card.bslib-full-screen .plot-container {
+  width:  100% !important;
+  height: 100% !important;
+}
+
+/* svg inside Plotly: fill container */
+.bslib-full-screen-portal .main-svg,
+.bslib-card.bslib-full-screen .main-svg {
+  width:  100% !important;
+  height: 100% !important;
+}
+
+/* Close button */
+.bslib-full-screen-portal .bslib-full-screen-exit,
+.bslib-card.bslib-full-screen .bslib-full-screen-exit {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  z-index: 10;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 4px 10px;
+  color: #475569;
+  font-size: 0.8em;
+  cursor: pointer;
+}

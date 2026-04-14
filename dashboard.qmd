@@ -929,7 +929,7 @@ make_gauge(data_ods8)
 
 # Resumen {scrolling=true icon="bi-bar-chart-fill"}
 
-## Row {height=580px}
+## Row {height=1200px}
 
 ```{python}
 #| title: "Radar — Chamula vs Promedio Nacional en los 4 ODS"
@@ -966,7 +966,7 @@ fig_radar.add_trace(go.Scatterpolar(
     ),
     text=[f"<b>{v:.1f}%</b>" for v in chamula_vals] + [""],
     textposition="top center",
-    textfont=dict(size=11, color=NEON_RED, family="Arial Black"),
+    textfont=dict(size=14, color=NEON_RED, family="Arial Black"),
     name="Chamula",
     hovertemplate="<b>Chamula</b><br>%{theta}: %{r:.1f}%<extra></extra>",
 ))
@@ -985,14 +985,14 @@ fig_radar.add_trace(go.Scatterpolar(
     ),
     text=[f"<b>{v:.1f}%</b>" for v in nacional_vals] + [""],
     textposition="bottom center",
-    textfont=dict(size=10, color=HEAL_GREEN, family="Arial Black"),
+    textfont=dict(size=13, color=HEAL_GREEN, family="Arial Black"),
     name="Promedio Nacional",
     hovertemplate="<b>Nacional</b><br>%{theta}: %{r:.1f}%<extra></extra>",
 ))
 
 fig_radar.update_layout(
     polar=dict(
-        domain=dict(x=[0.05, 0.95], y=[0.0, 0.92]),
+        domain=dict(x=[0.02, 0.98], y=[0.02, 0.96]),
         radialaxis=dict(
             visible=True,
             range=[0, 100],
@@ -1003,10 +1003,10 @@ fig_radar.update_layout(
             gridcolor="#e2e8f0",
             gridwidth=1,
             tickcolor="#94a3b8",
-            tickfont=dict(size=9, color="#94a3b8"),
+            tickfont=dict(size=11, color="#94a3b8"),
         ),
         angularaxis=dict(
-            tickfont=dict(size=11, color="#1e293b", family="Arial"),
+            tickfont=dict(size=14, color="#1e293b", family="Arial Black"),
             rotation=90,
             direction="clockwise",
             linecolor="#e2e8f0",
@@ -1025,16 +1025,16 @@ fig_radar.update_layout(
         bordercolor="#e2e8f0",
         borderwidth=1,
     ),
-    height=520, autosize=True,
+    height=None, autosize=True,
     template="plotly_white",
     paper_bgcolor="rgba(0,0,0,0)",
     plot_bgcolor="rgba(0,0,0,0)",
-    margin=dict(t=20, b=60, l=20, r=20),
+    margin=dict(t=10, b=70, l=10, r=10),
 )
 fig_radar.show()
 ```
 
-## Row {height=420px}
+## Row {height=480px}
 
 ```{python}
 #| title: "Resumen de Brechas por ODS"

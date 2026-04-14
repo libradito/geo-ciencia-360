@@ -14,6 +14,27 @@
   --border-color:#e2e8f0;
 }
 
+/* ─── ODS-5 Género: override green → pink ────────────────────────── */
+#ods-5-género {
+  --heal-green:       #ec4899;
+  --bs-success:       #ec4899;
+  --bs-success-rgb:   236, 72, 153;
+}
+#ods-5-género .bslib-value-box.bg-success {
+  background-color: #ec4899 !important;
+  box-shadow: 0 0 12px rgba(236, 72, 153, 0.35), 0 0 1px rgba(236, 72, 153, 0.6) !important;
+}
+#ods-5-género .bslib-value-box.bg-success .value-box-showcase {
+  background: rgba(255, 255, 255, 0.20) !important;
+}
+#ods-5-género .bslib-value-box.bg-success .value-box-showcase i {
+  color: #ffffff !important;
+}
+#ods-5-género .bslib-value-box.bg-success .value-box-title,
+#ods-5-género .bslib-value-box.bg-success .value-box-value {
+  color: #ffffff !important;
+}
+
 /* ─── Light Base + Subtle Dot Grid ──────────────────────────────── */
 body,
 .dashboard-page,

@@ -2,14 +2,19 @@
 Módulo INEGI — API de Indicadores del INEGI
 Fuente: Instituto Nacional de Estadística y Geografía
 Sistema: Banco de Información Económica (BIE) / Indicadores
-Token: a388a068-7c9a-7aef-5768-9021370b96e9
+Token: cargado desde .env  →  INEGI_TOKEN=<tu_token>
 Endpoint: https://www.inegi.org.mx/app/api/indicadores/desarrolladores/jsonxml/
 """
 
+import os
+
 import requests
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # ─── Token INEGI ─────────────────────────────────────────────────────
-INEGI_TOKEN = "a388a068-7c9a-7aef-5768-9021370b96e9"
+INEGI_TOKEN = os.getenv("INEGI_TOKEN", "")
 
 # ─── Mapping ODS → ID de indicador INEGI ─────────────────────────────
 # Entidad: 07 = Chiapas

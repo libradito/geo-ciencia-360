@@ -8,3 +8,4 @@ jupyter
 jupyter-cache
 nbformat
 itables
+python-dotenv==1.0.1

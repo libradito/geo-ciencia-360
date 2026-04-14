@@ -3,7 +3,7 @@ title: "EMPODERAMIENTO A MUJERES CHAMULA"
 subtitle: "Centro de Mando Clínico — San Juan Chamula ante los ODS"
 format:
   dashboard:
-    theme: darkly
+    theme: flatly
     css: styles.css
     nav-buttons:
       - icon: github
@@ -27,16 +27,16 @@ from IPython.display import display, HTML
 from modules.core import get_ods_data
 
 # ── Color Palette ────────────────────────────────────────────────────
-NEON_RED    = "#FF3131"   # Chamula crisis
-HEAL_GREEN  = "#39FF14"   # National averages / success
-NEON_ORANGE = "#FF6B00"   # Intense orange / moderate warning
-ALERT_YEL   = "#FFD700"   # Alert yellow
+NEON_RED    = "#dc2626"   # Chamula crisis
+HEAL_GREEN  = "#16a34a"   # National averages / success
+NEON_ORANGE = "#ea580c"   # Intense orange / moderate warning
+ALERT_YEL   = "#ca8a04"   # Alert yellow
 
 # ── Shared gauge steps: green → yellow → red crisis zone ────────────
 GAUGE_STEPS_PCT = [
-    dict(range=[0,  40], color="rgba(57,255,20,0.20)"),
-    dict(range=[40, 80], color="rgba(255,215,0,0.20)"),
-    dict(range=[80,100], color="rgba(255,49,49,0.30)"),
+    dict(range=[0,  40], color="rgba(22,163,74,0.18)"),
+    dict(range=[40, 80], color="rgba(202,138,4,0.18)"),
+    dict(range=[80,100], color="rgba(220,38,38,0.22)"),
 ]
 
 # ── CONEVAL 2020 constants for "Inicio" gauges ───────────────────────
@@ -77,22 +77,22 @@ def make_poverty_gauge(value, title, bar_color):
             suffix="%",
             font=dict(size=52, color=bar_color, family="Arial Black"),
         ),
-        title=dict(text=title, font=dict(size=11, color="#7a9aba")),
+        title=dict(text=title, font=dict(size=11, color="#64748b")),
         gauge=dict(
             axis=dict(
                 range=[0, 100],
                 tickwidth=1,
-                tickcolor="#2a3a50",
+                tickcolor="#cbd5e1",
                 tickvals=[0, 25, 50, 75, 100],
                 ticktext=["0", "25", "50", "75", "100%"],
-                tickfont=dict(color="#4a6a80", size=10),
+                tickfont=dict(color="#64748b", size=10),
             ),
             bar=dict(color=bar_color, thickness=0.36),
             bgcolor="rgba(0,0,0,0)",
             borderwidth=0,
             steps=arc_steps,
             threshold=dict(
-                line=dict(color="#ffffff", width=3),
+                line=dict(color="#1e293b", width=3),
                 thickness=0.92,
                 value=value,
             ),
@@ -100,7 +100,7 @@ def make_poverty_gauge(value, title, bar_color):
     ))
     fig.update_layout(
         height=None, autosize=True,
-        template="plotly_dark",
+        template="plotly_white",
         margin=dict(t=50, b=10, l=20, r=20),
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
@@ -121,11 +121,11 @@ def make_chamula_map():
 
     # Color scale: near-black base → NEON_ORANGE for Chiapas only
     STATE_CS = [
-        [0.00, "#0e1219"],
-        [0.08, "#131820"],
-        [0.10, "#131820"],
-        [0.90, "#131820"],
-        [0.92, "#1a2030"],
+        [0.00, "#dde4ed"],
+        [0.08, "#dde4ed"],
+        [0.10, "#dde4ed"],
+        [0.90, "#dde4ed"],
+        [0.92, "#e8edf5"],
         [1.00, NEON_ORANGE],
     ]
 
@@ -192,14 +192,14 @@ def make_chamula_map():
                         fitbounds="locations",
                         visible=False,
                         bgcolor="rgba(0,0,0,0)",
-                        showland=True,  landcolor="#04090f",
-                        showocean=True, oceancolor="#020408",
-                        showlakes=True, lakecolor="#020408",
+                        showland=True,  landcolor="#e8edf5",
+                        showocean=True, oceancolor="#bfdbfe",
+                        showlakes=True, lakecolor="#bfdbfe",
                         showrivers=False,
-                        showcountries=True,  countrycolor="#2a4060", countrywidth=1.5,
-                        showcoastlines=True, coastlinecolor="#4a7aaa", coastlinewidth=2.0,
-                        lataxis=dict(showgrid=True, gridcolor="rgba(0,160,220,0.13)", gridwidth=0.6),
-                        lonaxis=dict(showgrid=True, gridcolor="rgba(0,160,220,0.13)", gridwidth=0.6),
+                        showcountries=True,  countrycolor="#94a3b8", countrywidth=1.5,
+                        showcoastlines=True, coastlinecolor="#64748b", coastlinewidth=2.0,
+                        lataxis=dict(showgrid=True, gridcolor="rgba(0,0,0,0.06)", gridwidth=0.6),
+                        lonaxis=dict(showgrid=True, gridcolor="rgba(0,0,0,0.06)", gridwidth=0.6),
                         showframe=False,
                     )
                     # Brighten state borders after adding traces
@@ -223,8 +223,8 @@ def make_chamula_map():
             locations=["Mexico"],
             z=[1],
             locationmode="country names",
-            colorscale=[[0, "#20252d"], [1, "#20252d"]],
-            marker_line_color="#4a5060",
+            colorscale=[[0, "#e2e8f0"], [1, "#e2e8f0"]],
+            marker_line_color="#94a3b8",
             marker_line_width=2.0,
             showscale=False,
             hoverinfo="skip",
@@ -235,8 +235,8 @@ def make_chamula_map():
                 locations=[country],
                 z=[0.2],
                 locationmode="country names",
-                colorscale=[[0, "#0a0c0f"], [1, "#0a0c0f"]],
-                marker_line_color="#14161a",
+                colorscale=[[0, "#f1f5f9"], [1, "#f1f5f9"]],
+                marker_line_color="#cbd5e1",
                 marker_line_width=0.8,
                 showscale=False,
                 hoverinfo="skip",
@@ -245,15 +245,15 @@ def make_chamula_map():
             scope="north america",
             center=dict(lat=24, lon=-102),
             projection_scale=3.8,
-            showland=True,       landcolor="#04090f",
-            showocean=True,      oceancolor="#020408",
-            showlakes=True,      lakecolor="#020408",
+            showland=True,       landcolor="#e8edf5",
+            showocean=True,      oceancolor="#bfdbfe",
+            showlakes=True,      lakecolor="#bfdbfe",
             showrivers=False,
-            showcountries=True,  countrycolor="#2a4060",  countrywidth=1.5,
-            showsubunits=True,   subunitcolor="#3a6090",  subunitwidth=1.4,
-            showcoastlines=True, coastlinecolor="#4a7aaa", coastlinewidth=2.0,
-            lataxis=dict(showgrid=True, gridcolor="rgba(0,160,220,0.13)", gridwidth=0.6),
-            lonaxis=dict(showgrid=True, gridcolor="rgba(0,160,220,0.13)", gridwidth=0.6),
+            showcountries=True,  countrycolor="#94a3b8",  countrywidth=1.5,
+            showsubunits=True,   subunitcolor="#94a3b8",  subunitwidth=1.4,
+            showcoastlines=True, coastlinecolor="#64748b", coastlinewidth=2.0,
+            lataxis=dict(showgrid=True, gridcolor="rgba(0,0,0,0.06)", gridwidth=0.6),
+            lonaxis=dict(showgrid=True, gridcolor="rgba(0,0,0,0.06)", gridwidth=0.6),
             showframe=False,
             bgcolor="rgba(0,0,0,0)",
         )
@@ -263,7 +263,7 @@ def make_chamula_map():
         lat=[16.5], lon=[-92.5],
         mode="text",
         text=["CHIAPAS"],
-        textfont=dict(size=8, color="rgba(255,150,80,0.55)", family="Arial"),
+        textfont=dict(size=8, color="rgba(180,80,20,0.70)", family="Arial"),
         hoverinfo="skip",
         showlegend=False,
     ))
@@ -277,8 +277,8 @@ def make_chamula_map():
         (30,  0.35,  NEON_RED),
         (20,  0.58,  NEON_RED),
         (12,  0.82,  NEON_RED),
-        (7,   1.00,  "#ff7777"),
-        (3,   1.00,  "#ffffff"),
+        (7,   1.00,  "#ef4444"),
+        (3,   1.00,  "#1e293b"),
     ]:
         fig.add_trace(go.Scattergeo(
             lat=[CHAMULA_LAT], lon=[CHAMULA_LON],
@@ -295,7 +295,7 @@ def make_chamula_map():
         marker=dict(size=1, color="rgba(0,0,0,0)", line=dict(width=0)),
         text=["San Juan Chamula"],
         textposition="top center",
-        textfont=dict(size=11, color="#ff9999", family="Arial Black"),
+        textfont=dict(size=11, color="#b91c1c", family="Arial Black"),
         hovertext=["<b>San Juan Chamula</b><br>Pobreza Total: 96.3%"
                    "<br>Pobreza Extrema: 52.3%<br>CVEGEO: 07023"],
         hoverinfo="text",
@@ -304,7 +304,7 @@ def make_chamula_map():
 
     fig.update_layout(
         height=None, autosize=True,
-        template="plotly_dark",
+        template="plotly_white",
         margin=dict(t=5, b=5, l=0, r=0),
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
@@ -318,7 +318,7 @@ def make_chamula_map():
 # ═══════════════════════════════════════════════════════════════════════
 def make_ods_comparison_bar():
     # Per-ODS palette matching the reference image style
-    ODS_COLORS  = ["#FF3131", "#3b82f6", "#a855f7", "#f97316"]
+    ODS_COLORS  = ["#dc2626", "#2563eb", "#7c3aed", "#ea580c"]
     ods_labels  = ["ODS 1<br>Pobreza", "ODS 4<br>Educación",
                    "ODS 5<br>Género",  "ODS 8<br>Trabajo"]
     chamula_vals = [52.3, 55.3, 91.7, 76.9]
@@ -362,12 +362,12 @@ def make_ods_comparison_bar():
             marker=dict(
                 symbol="line-ew",
                 size=22,
-                color="rgba(255,255,255,0.7)",
-                line=dict(color="rgba(255,255,255,0.7)", width=3),
+                color="rgba(30,41,59,0.7)",
+                line=dict(color="rgba(30,41,59,0.7)", width=3),
             ),
             text=[f"{v:.1f}%" for v in nac_y],
             textposition="top center",
-            textfont=dict(color="rgba(200,220,240,0.75)", size=10),
+            textfont=dict(color="rgba(30,41,59,0.75)", size=10),
             name="Promedio Nacional",
             hovertemplate="Nacional: %{y:.1f}%<extra></extra>",
         ))
@@ -376,9 +376,9 @@ def make_ods_comparison_bar():
         showlegend=True,
         legend=dict(
             orientation="h", y=-0.18, x=0.5, xanchor="center",
-            font=dict(size=10, color="#6a8aaa"),
+            font=dict(size=10, color="#475569"),
         ),
-        template="plotly_dark",
+        template="plotly_white",
         height=None, autosize=True,
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
@@ -387,12 +387,12 @@ def make_ods_comparison_bar():
         yaxis=dict(
             title=None,
             range=[0, 115],
-            gridcolor="#141e30",
+            gridcolor="#e2e8f0",
             zeroline=False,
-            tickfont=dict(color="#3a5a70", size=10),
+            tickfont=dict(color="#64748b", size=10),
         ),
         xaxis=dict(
-            tickfont=dict(size=11, color="#8aa8c8"),
+            tickfont=dict(size=11, color="#1e293b"),
             showgrid=False,
         ),
     )
@@ -408,12 +408,12 @@ def make_gauge(data, title_suffix=""):
     color = NEON_RED if brecha > 2 else NEON_ORANGE if brecha > 1.5 else HEAL_GREEN
     # Gradient arc steps for the brecha gauge
     brecha_steps = [
-        dict(range=[0,   0.5], color="rgba(57,255,20,0.08)"),
-        dict(range=[0.5, 1.0], color="rgba(57,255,20,0.18)"),
-        dict(range=[1.0, 1.5], color="rgba(255,215,0,0.12)"),
-        dict(range=[1.5, 2.0], color="rgba(255,215,0,0.22)"),
-        dict(range=[2.0, 3.5], color="rgba(255,107,0,0.20)"),
-        dict(range=[3.5, 5.0], color="rgba(255,49,49,0.28)"),
+        dict(range=[0,   0.5], color="rgba(22,163,74,0.10)"),
+        dict(range=[0.5, 1.0], color="rgba(22,163,74,0.20)"),
+        dict(range=[1.0, 1.5], color="rgba(202,138,4,0.12)"),
+        dict(range=[1.5, 2.0], color="rgba(202,138,4,0.22)"),
+        dict(range=[2.0, 3.5], color="rgba(234,88,12,0.18)"),
+        dict(range=[3.5, 5.0], color="rgba(220,38,38,0.22)"),
     ]
     fig = go.Figure(go.Indicator(
         mode="gauge+number",
@@ -424,22 +424,22 @@ def make_gauge(data, title_suffix=""):
         ),
         title=dict(
             text="Brecha Chamula vs Nacional",
-            font=dict(size=12, color="#6a8aaa"),
+            font=dict(size=12, color="#64748b"),
         ),
         gauge=dict(
             axis=dict(
                 range=[0, 5],
-                tickwidth=1, tickcolor="#1e3050",
+                tickwidth=1, tickcolor="#cbd5e1",
                 tickvals=[0, 1, 2, 3, 4, 5],
                 ticktext=["0", "1x", "2x", "3x", "4x", "5x"],
-                tickfont=dict(color="#3a5a70", size=10),
+                tickfont=dict(color="#64748b", size=10),
             ),
             bar=dict(color=color, thickness=0.36),
             bgcolor="rgba(0,0,0,0)",
             borderwidth=0,
             steps=brecha_steps,
             threshold=dict(
-                line=dict(color="#ffffff", width=3),
+                line=dict(color="#1e293b", width=3),
                 thickness=0.92,
                 value=brecha,
             ),
@@ -447,7 +447,7 @@ def make_gauge(data, title_suffix=""):
     ))
     fig.update_layout(
         height=None, autosize=True,
-        template="plotly_dark",
+        template="plotly_white",
         margin=dict(t=45, b=10, l=20, r=20),
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
@@ -465,7 +465,7 @@ def make_comparison(data, indicator_name="Indicador"):
     color_map = {
         "Chamula": NEON_RED,
         "México":  NEON_ORANGE,
-        "LATAM":   "#00D4FF",
+        "LATAM":   "#0284c7",
         "Mundo":   HEAL_GREEN,
     }
 
@@ -481,17 +481,17 @@ def make_comparison(data, indicator_name="Indicador"):
         marker_color=colors,
         text=[f"<b>{v:.1f}%</b>" for v in valores],
         textposition="outside",
-        textfont=dict(size=14, color="#ffffff"),
+        textfont=dict(size=14, color="#1e293b"),
     ))
     fig.update_layout(
         xaxis_title=indicator_name,
         height=None, autosize=True,
-        template="plotly_dark",
+        template="plotly_white",
         margin=dict(t=10, b=30, l=10, r=60),
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        xaxis=dict(showgrid=True, gridcolor="#2d3748"),
-        yaxis=dict(tickfont=dict(size=14, family="Arial Black", color="#e2e8f0")),
+        xaxis=dict(showgrid=True, gridcolor="#e2e8f0"),
+        yaxis=dict(tickfont=dict(size=14, family="Arial Black", color="#1e293b")),
     )
     return fig
 
@@ -506,10 +506,10 @@ def make_donut(chamula_val, label="Pobreza Extrema"):
         labels=[label, "Resto de la población"],
         values=[chamula_val, rest],
         hole=0.6,
-        marker=dict(colors=[NEON_RED, "#1e2a3a"]),
+        marker=dict(colors=[NEON_RED, "#cbd5e1"]),
         textinfo="percent+label",
         textposition="inside",
-        textfont=dict(size=13, family="Arial Black", color="#ffffff"),
+        textfont=dict(size=13, family="Arial Black", color="#020202"),
         insidetextorientation="horizontal",
         hoverinfo="label+value+percent",
     ))
@@ -519,14 +519,15 @@ def make_donut(chamula_val, label="Pobreza Extrema"):
     )
     fig.update_layout(
         height=None, autosize=True,
-        template="plotly_dark",
+        template="plotly_white",
         margin=dict(t=10, b=10, l=10, r=10),
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
         showlegend=True,
         legend=dict(
             orientation="h", yanchor="bottom", y=-0.15, x=0.5,
-            xanchor="center", font=dict(size=13, color="#cccccc"),
+            xanchor="center", font=dict(size=13, color="#475569"),
+            entrywidth=160,
         ),
     )
     return fig
@@ -598,7 +599,7 @@ display(HTML('''
       <span class="ods-badge">ODS 5 &middot; G&#233;nero</span>
       <span class="ods-badge">ODS 8 &middot; Trabajo</span>
     </div>
-    <a href="#" class="neon-button">Aplicar Apoyo Social</a>
+    <a href="https://www.empoderandoarte.com/" target="_blank" rel="noopener noreferrer" class="neon-button">Aplicar Apoyo Social</a>
   </div>
 </div>
 '''))
@@ -926,9 +927,9 @@ make_comparison(data_ods8, "Trabajo Decente (%)")
 make_gauge(data_ods8)
 ```
 
-# Resumen {icon="bi-bar-chart-fill"}
+# Resumen {scrolling=true icon="bi-bar-chart-fill"}
 
-## Row {height=50%}
+## Row {height=580px}
 
 ```{python}
 #| title: "Radar — Chamula vs Promedio Nacional en los 4 ODS"
@@ -950,47 +951,90 @@ nacional_vals = [
 ]
 
 fig_radar = go.Figure()
+
+# ── Chamula trace ────────────────────────────────────────────────────
 fig_radar.add_trace(go.Scatterpolar(
     r=chamula_vals + [chamula_vals[0]],
     theta=categories + [categories[0]],
-    fill="toself", fillcolor="rgba(255,49,49,0.22)",
-    line=dict(color=NEON_RED, width=3),
+    fill="toself",
+    fillcolor="rgba(220,38,38,0.14)",
+    line=dict(color=NEON_RED, width=2.5),
+    mode="lines+markers+text",
+    marker=dict(
+        size=9, color=NEON_RED,
+        line=dict(color="#ffffff", width=2),
+    ),
+    text=[f"<b>{v:.1f}%</b>" for v in chamula_vals] + [""],
+    textposition="top center",
+    textfont=dict(size=11, color=NEON_RED, family="Arial Black"),
     name="Chamula",
-    text=[f"{v:.1f}%" for v in chamula_vals] + [f"{chamula_vals[0]:.1f}%"],
+    hovertemplate="<b>Chamula</b><br>%{theta}: %{r:.1f}%<extra></extra>",
 ))
+
+# ── Nacional trace ───────────────────────────────────────────────────
 fig_radar.add_trace(go.Scatterpolar(
     r=nacional_vals + [nacional_vals[0]],
     theta=categories + [categories[0]],
-    fill="toself", fillcolor="rgba(57,255,20,0.12)",
-    line=dict(color=HEAL_GREEN, width=3, dash="dash"),
+    fill="toself",
+    fillcolor="rgba(22,163,74,0.10)",
+    line=dict(color=HEAL_GREEN, width=2, dash="dot"),
+    mode="lines+markers+text",
+    marker=dict(
+        size=8, color=HEAL_GREEN,
+        line=dict(color="#ffffff", width=2),
+    ),
+    text=[f"<b>{v:.1f}%</b>" for v in nacional_vals] + [""],
+    textposition="bottom center",
+    textfont=dict(size=10, color=HEAL_GREEN, family="Arial Black"),
     name="Promedio Nacional",
-    text=[f"{v:.1f}%" for v in nacional_vals] + [f"{nacional_vals[0]:.1f}%"],
+    hovertemplate="<b>Nacional</b><br>%{theta}: %{r:.1f}%<extra></extra>",
 ))
+
 fig_radar.update_layout(
     polar=dict(
+        domain=dict(x=[0.05, 0.95], y=[0.0, 0.92]),
         radialaxis=dict(
-            visible=True, range=[0, 100],
-            showline=False, gridcolor="#2d3748",
-            tickfont=dict(color="#888"),
+            visible=True,
+            range=[0, 100],
+            ticksuffix="%",
+            nticks=6,
+            showline=True,
+            linecolor="#e2e8f0",
+            gridcolor="#e2e8f0",
+            gridwidth=1,
+            tickcolor="#94a3b8",
+            tickfont=dict(size=9, color="#94a3b8"),
         ),
-        angularaxis=dict(tickfont=dict(size=13, color="#cccccc")),
-        bgcolor="rgba(0,0,0,0)",
+        angularaxis=dict(
+            tickfont=dict(size=11, color="#1e293b", family="Arial"),
+            rotation=90,
+            direction="clockwise",
+            linecolor="#e2e8f0",
+            gridcolor="#e2e8f0",
+        ),
+        bgcolor="rgba(241,245,249,0.4)",
     ),
     showlegend=True,
     legend=dict(
-        orientation="h", yanchor="bottom", y=-0.2, x=0.5,
-        xanchor="center", font=dict(size=13, color="#cccccc"),
+        orientation="h",
+        yanchor="bottom", y=-0.05,
+        x=0.5, xanchor="center",
+        font=dict(size=12, color="#475569"),
+        entrywidth=140,
+        bgcolor="rgba(255,255,255,0.7)",
+        bordercolor="#e2e8f0",
+        borderwidth=1,
     ),
-    height=None, autosize=True,
-    template="plotly_dark",
+    height=520, autosize=True,
+    template="plotly_white",
     paper_bgcolor="rgba(0,0,0,0)",
     plot_bgcolor="rgba(0,0,0,0)",
-    margin=dict(t=20, b=40, l=40, r=40),
+    margin=dict(t=20, b=60, l=20, r=20),
 )
 fig_radar.show()
 ```
 
-## Row {height=50%}
+## Row {height=420px}
 
 ```{python}
 #| title: "Resumen de Brechas por ODS"
@@ -1010,23 +1054,23 @@ fig_summary.add_trace(go.Bar(
     marker_color=bar_colors,
     text=[f"<b>{b:.1f}x</b>" for b in brechas],
     textposition="outside",
-    textfont=dict(size=16, color="#ffffff"),
+    textfont=dict(size=16, color="#1e293b"),
 ))
 fig_summary.add_hline(
-    y=1.0, line_dash="dash", line_color="#555",
+    y=1.0, line_dash="dash", line_color="#94a3b8",
     annotation_text="Promedio nacional = 1.0x",
     annotation_position="top right",
-    annotation_font_color="#888",
+    annotation_font_color="#64748b",
 )
 fig_summary.update_layout(
     yaxis_title="Brecha (veces peor que el promedio nacional)",
     height=None, autosize=True,
-    template="plotly_dark",
+    template="plotly_white",
     paper_bgcolor="rgba(0,0,0,0)",
     plot_bgcolor="rgba(0,0,0,0)",
     margin=dict(t=20, b=30),
-    xaxis=dict(tickfont=dict(size=13, color="#cccccc")),
-    yaxis=dict(gridcolor="#2d3748"),
+    xaxis=dict(tickfont=dict(size=13, color="#1e293b")),
+    yaxis=dict(gridcolor="#e2e8f0"),
 )
 fig_summary.show()
 ```
@@ -1038,7 +1082,7 @@ fig_summary.show()
 ```{python}
 #| title: "Panel de Auditoría — Trazabilidad de Datos"
 
-audit_html = '<p style="font-size:1.05em;color:#9ca3af;"><em>Cada número en este tablero es rastreable hasta su fuente original. Ningún dato fue inventado o hardcodeado.</em></p>'
+audit_html = '<p style="font-size:1.05em;color:#475569;"><em>Cada número en este tablero es rastreable hasta su fuente original. Ningún dato fue inventado o hardcodeado.</em></p>'
 
 for ods_key, data in [("ODS1", data_ods1), ("ODS4", data_ods4), ("ODS5", data_ods5), ("ODS8", data_ods8)]:
     if data and data.get("fuentes"):
@@ -1067,32 +1111,32 @@ display(HTML(audit_html))
 #| title: "Nota Metodológica"
 
 display(HTML('''
-<div style="color:#e2e8f0;">
-<h4 style="color:#e2e8f0;">Fuentes Oficiales</h4>
+<div style="color:#1e293b;">
+<h4 style="color:#1e293b;">Fuentes Oficiales</h4>
 <ul>
   <li><strong>CONEVAL</strong> — Consejo Nacional de Evaluación de la Política de Desarrollo Social.
     Base de Datos de Pobreza Municipal 2020.
-    <a href="https://www.coneval.org.mx/Medicion/Paginas/Pobreza-municipio-2010-2020.aspx" target="_blank" style="color:#60a5fa;">URL</a></li>
+    <a href="https://www.coneval.org.mx/Medicion/Paginas/Pobreza-municipio-2010-2020.aspx" target="_blank" style="color:#2563eb;">URL</a></li>
   <li><strong>INEGI</strong> — Instituto Nacional de Estadística y Geografía.
     Censo de Población y Vivienda 2020 + API de Indicadores.
-    <a href="https://www.inegi.org.mx/programas/ccpv/2020/" target="_blank" style="color:#60a5fa;">URL</a></li>
+    <a href="https://www.inegi.org.mx/programas/ccpv/2020/" target="_blank" style="color:#2563eb;">URL</a></li>
   <li><strong>Banco Mundial</strong> — World Development Indicators API v2.
     Fuente custodio designada por ONU para indicadores ODS.
-    <a href="https://data.worldbank.org/indicator" target="_blank" style="color:#60a5fa;">URL</a></li>
+    <a href="https://data.worldbank.org/indicator" target="_blank" style="color:#2563eb;">URL</a></li>
   <li><strong>ONU</strong> — División de Estadística. Indicadores de los ODS.
-    <a href="https://unstats.un.org/sdgs/" target="_blank" style="color:#60a5fa;">URL</a></li>
+    <a href="https://unstats.un.org/sdgs/" target="_blank" style="color:#2563eb;">URL</a></li>
 </ul>
-<h4 style="color:#e2e8f0;">Periodicidad</h4>
+<h4 style="color:#1e293b;">Periodicidad</h4>
 <ul>
   <li>CONEVAL: Bienal. Última actualización: datos 2020 (publicados diciembre 2021).</li>
   <li>INEGI: Variable según indicador. Censo cada 10 años.</li>
   <li>Banco Mundial: Anual. Datos rango 2018-2022.</li>
 </ul>
-<h4 style="color:#e2e8f0;">Metodología Anti Cherry-Picking</h4>
+<h4 style="color:#1e293b;">Metodología Anti Cherry-Picking</h4>
 <p>Datos de Chamula (CVEGEO 07023) comparados contra promedio <strong>nacional</strong> de 2,469 municipios (CONEVAL),
 promedio <strong>LATAM</strong> (código LAC, Banco Mundial) y promedio <strong>mundial</strong> (código WLD, Banco Mundial).
 No se seleccionaron indicadores para favorecer ninguna narrativa.</p>
-<h4 style="color:#e2e8f0;">Contexto Demográfico</h4>
+<h4 style="color:#1e293b;">Contexto Demográfico</h4>
 <p>San Juan Chamula, Chiapas: 102,970 habitantes. Población mayoritariamente indígena Tsotsil.
 487,898 hablantes Tsotsil en Chiapas, 38,124 mujeres en el municipio.</p>
 </div>

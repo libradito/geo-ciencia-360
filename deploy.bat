@@ -29,6 +29,14 @@ if errorlevel 1 (
 )
 echo  Dashboard rendered successfully.
 
+REM ── Cache-bust styles.css ──────────────────────────────────────────
+echo.
+echo  [1b] Cache-busting CSS...
+python cache_bust.py
+if errorlevel 1 (
+    echo  WARNING: cache_bust.py failed - CSS may not refresh in browsers
+)
+
 REM ── Commit changes ─────────────────────────────────────────────────
 echo.
 echo  [2/3] Committing changes...

@@ -1,9 +1,9 @@
 ---
-title: "Geo-Ciencia 360"
-subtitle: "Chamula ante los ODS — Pobreza, Educación, Género y Trabajo"
+title: "EMPODERAMIENTO A MUJERES CHAMULA"
+subtitle: "Centro de Mando Clínico — San Juan Chamula ante los ODS"
 format:
   dashboard:
-    theme: cosmo
+    theme: darkly
     css: styles.css
     nav-buttons:
       - icon: github
@@ -16,7 +16,7 @@ execute:
 #| label: setup
 #| include: false
 
-import sys, os
+import sys, os, requests
 sys.path.insert(0, os.path.dirname(os.path.abspath("__file__")))
 
 import pandas as pd
@@ -26,47 +26,448 @@ from plotly.subplots import make_subplots
 from IPython.display import display, HTML
 from modules.core import get_ods_data
 
-# Pre-load all ODS data
+# ── Color Palette ────────────────────────────────────────────────────
+NEON_RED    = "#FF3131"   # Chamula crisis
+HEAL_GREEN  = "#39FF14"   # National averages / success
+NEON_ORANGE = "#FF6B00"   # Intense orange / moderate warning
+ALERT_YEL   = "#FFD700"   # Alert yellow
+
+# ── Shared gauge steps: green → yellow → red crisis zone ────────────
+GAUGE_STEPS_PCT = [
+    dict(range=[0,  40], color="rgba(57,255,20,0.20)"),
+    dict(range=[40, 80], color="rgba(255,215,0,0.20)"),
+    dict(range=[80,100], color="rgba(255,49,49,0.30)"),
+]
+
+# ── CONEVAL 2020 constants for "Inicio" gauges ───────────────────────
+POBREZA_TOTAL    = 96.3   # pobreza column, CVEGEO 07023
+POBREZA_EXTREMA  = 52.3   # pobreza_e column
+POBREZA_MODERADA = 44.0   # pobreza - pobreza_e (moderate poverty)
+
+# ── Pre-load all ODS data ─────────────────────────────────────────────
 data_ods1 = get_ods_data("ODS1")
 data_ods4 = get_ods_data("ODS4")
 data_ods5 = get_ods_data("ODS5")
 data_ods8 = get_ods_data("ODS8")
 
-# ── Helper: Gauge chart for brecha ─────────────────────────────────
+# ═══════════════════════════════════════════════════════════════════════
+# HELPER: Poverty gauge (0-100% scale) — used in Inicio page
+# ═══════════════════════════════════════════════════════════════════════
+def make_poverty_gauge(value, title, bar_color):
+    # Build a gradient arc: 60 micro-steps that grow brighter toward the value
+    arc_steps = []
+    n = 60
+    for i in range(n):
+        lo = i * (100 / n)
+        hi = (i + 1) * (100 / n)
+        # Intensity ramps up from 0.04 → 0.22 as we approach the value
+        intensity = 0.04 + (lo / 100) * 0.22
+        if lo < 40:
+            c = f"rgba(57,255,20,{intensity:.3f})"
+        elif lo < 80:
+            c = f"rgba(255,215,0,{intensity:.3f})"
+        else:
+            c = f"rgba(255,49,49,{intensity:.3f})"
+        arc_steps.append(dict(range=[lo, hi], color=c))
+
+    fig = go.Figure(go.Indicator(
+        mode="gauge+number",
+        value=value,
+        number=dict(
+            suffix="%",
+            font=dict(size=52, color=bar_color, family="Arial Black"),
+        ),
+        title=dict(text=title, font=dict(size=11, color="#7a9aba")),
+        gauge=dict(
+            axis=dict(
+                range=[0, 100],
+                tickwidth=1,
+                tickcolor="#2a3a50",
+                tickvals=[0, 25, 50, 75, 100],
+                ticktext=["0", "25", "50", "75", "100%"],
+                tickfont=dict(color="#4a6a80", size=10),
+            ),
+            bar=dict(color=bar_color, thickness=0.36),
+            bgcolor="rgba(0,0,0,0)",
+            borderwidth=0,
+            steps=arc_steps,
+            threshold=dict(
+                line=dict(color="#ffffff", width=3),
+                thickness=0.92,
+                value=value,
+            ),
+        ),
+    ))
+    fig.update_layout(
+        height=None, autosize=True,
+        template="plotly_dark",
+        margin=dict(t=50, b=10, l=20, r=20),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+    )
+    return fig
+
+# ═══════════════════════════════════════════════════════════════════════
+# HELPER: Chiapas choropleth map — used in Inicio page
+# ═══════════════════════════════════════════════════════════════════════
+def make_chamula_map():
+    """
+    Tactical map: tries GeoJSON for individual state polygons (Chiapas
+    highlighted in orange), falls back to built-in Plotly geo with
+    visible subunit borders. Multi-ring pulse on Chamula in both paths.
+    """
+    CHAMULA_LAT = 16.784
+    CHAMULA_LON = -92.689
+
+    # Color scale: near-black base → NEON_ORANGE for Chiapas only
+    STATE_CS = [
+        [0.00, "#0e1219"],
+        [0.08, "#131820"],
+        [0.10, "#131820"],
+        [0.90, "#131820"],
+        [0.92, "#1a2030"],
+        [1.00, NEON_ORANGE],
+    ]
+
+    GEOJSON_URLS = [
+        "https://raw.githubusercontent.com/angelnmara/geojson/master/mexicoHigh.json",
+        "https://raw.githubusercontent.com/isidoregv/mexico-geojson/main/estados.geojson",
+    ]
+
+    fig = go.Figure()
+    geojson_ok = False
+
+    # ── Attempt GeoJSON choropleth (individual states) ──────────────
+    for url in GEOJSON_URLS:
+        try:
+            r = requests.get(url, timeout=12)
+            r.raise_for_status()
+            gj = r.json()
+            features = gj.get("features", [])
+            if not features:
+                continue
+
+            # Auto-detect state name key
+            first_props = features[0].get("properties", {})
+            name_key = next(
+                (k for k in ["NOM_ENT", "name", "NAME", "NOMBRE", "Estado", "state"]
+                 if k in first_props),
+                None,
+            )
+
+            ids, names, vals = [], [], []
+            for feat in features:
+                props = feat.get("properties", {})
+                name = str(props.get(name_key, "")) if name_key else ""
+                fid  = str(feat.get("id") or props.get("id") or name)
+                ids.append(fid)
+                names.append(name)
+                is_chiapas = (
+                    "chiapas" in name.lower() or
+                    fid in ["07", "7"] or
+                    str(props.get("CVE_ENT", "")) in ["07", "7"]
+                )
+                vals.append(100 if is_chiapas else 10)
+
+            df_s = pd.DataFrame({"id": ids, "name": names, "val": vals})
+
+            # Try feature-level id, then property name
+            for loc_col, fidkey in [
+                ("id",   "id"),
+                ("name", f"properties.{name_key}" if name_key else None),
+            ]:
+                if fidkey is None:
+                    continue
+                try:
+                    fc = px.choropleth(
+                        df_s, geojson=gj,
+                        locations=loc_col, color="val",
+                        color_continuous_scale=STATE_CS,
+                        featureidkey=fidkey,
+                        template="plotly_dark",
+                    )
+                    for trace in fc.data:
+                        fig.add_trace(trace)
+                    fig.update_geos(
+                        fitbounds="locations",
+                        visible=False,
+                        bgcolor="rgba(0,0,0,0)",
+                        showland=True,  landcolor="#04090f",
+                        showocean=True, oceancolor="#020408",
+                        showlakes=True, lakecolor="#020408",
+                        showrivers=False,
+                        showcountries=True,  countrycolor="#2a4060", countrywidth=1.5,
+                        showcoastlines=True, coastlinecolor="#4a7aaa", coastlinewidth=2.0,
+                        lataxis=dict(showgrid=True, gridcolor="rgba(0,160,220,0.13)", gridwidth=0.6),
+                        lonaxis=dict(showgrid=True, gridcolor="rgba(0,160,220,0.13)", gridwidth=0.6),
+                        showframe=False,
+                    )
+                    # Brighten state borders after adding traces
+                    fig.update_traces(
+                        selector=dict(type="choropleth"),
+                        marker_line_color="#4a7aaa",
+                        marker_line_width=1.8,
+                    )
+                    geojson_ok = True
+                    break
+                except Exception:
+                    continue
+            if geojson_ok:
+                break
+        except Exception:
+            continue
+
+    # ── Built-in fallback — visible subunit borders ─────────────────
+    if not geojson_ok:
+        fig.add_trace(go.Choropleth(
+            locations=["Mexico"],
+            z=[1],
+            locationmode="country names",
+            colorscale=[[0, "#20252d"], [1, "#20252d"]],
+            marker_line_color="#4a5060",
+            marker_line_width=2.0,
+            showscale=False,
+            hoverinfo="skip",
+        ))
+        for country in ["United States", "Guatemala", "Belize",
+                        "Honduras", "El Salvador"]:
+            fig.add_trace(go.Choropleth(
+                locations=[country],
+                z=[0.2],
+                locationmode="country names",
+                colorscale=[[0, "#0a0c0f"], [1, "#0a0c0f"]],
+                marker_line_color="#14161a",
+                marker_line_width=0.8,
+                showscale=False,
+                hoverinfo="skip",
+            ))
+        fig.update_geos(
+            scope="north america",
+            center=dict(lat=24, lon=-102),
+            projection_scale=3.8,
+            showland=True,       landcolor="#04090f",
+            showocean=True,      oceancolor="#020408",
+            showlakes=True,      lakecolor="#020408",
+            showrivers=False,
+            showcountries=True,  countrycolor="#2a4060",  countrywidth=1.5,
+            showsubunits=True,   subunitcolor="#3a6090",  subunitwidth=1.4,
+            showcoastlines=True, coastlinecolor="#4a7aaa", coastlinewidth=2.0,
+            lataxis=dict(showgrid=True, gridcolor="rgba(0,160,220,0.13)", gridwidth=0.6),
+            lonaxis=dict(showgrid=True, gridcolor="rgba(0,160,220,0.13)", gridwidth=0.6),
+            showframe=False,
+            bgcolor="rgba(0,0,0,0)",
+        )
+
+    # ── CHIAPAS label ────────────────────────────────────────────────
+    fig.add_trace(go.Scattergeo(
+        lat=[16.5], lon=[-92.5],
+        mode="text",
+        text=["CHIAPAS"],
+        textfont=dict(size=8, color="rgba(255,150,80,0.55)", family="Arial"),
+        hoverinfo="skip",
+        showlegend=False,
+    ))
+
+    # ── Multi-ring radar pulse (9 layers) ────────────────────────────
+    for size, opacity, color in [
+        (110, 0.022, NEON_RED),
+        (82,  0.048, NEON_RED),
+        (60,  0.10,  NEON_RED),
+        (44,  0.20,  NEON_RED),
+        (30,  0.35,  NEON_RED),
+        (20,  0.58,  NEON_RED),
+        (12,  0.82,  NEON_RED),
+        (7,   1.00,  "#ff7777"),
+        (3,   1.00,  "#ffffff"),
+    ]:
+        fig.add_trace(go.Scattergeo(
+            lat=[CHAMULA_LAT], lon=[CHAMULA_LON],
+            mode="markers",
+            marker=dict(size=size, color=color, opacity=opacity,
+                        symbol="circle", line=dict(width=0)),
+            hoverinfo="skip", showlegend=False,
+        ))
+
+    # ── Label ────────────────────────────────────────────────────────
+    fig.add_trace(go.Scattergeo(
+        lat=[CHAMULA_LAT], lon=[CHAMULA_LON],
+        mode="markers+text",
+        marker=dict(size=1, color="rgba(0,0,0,0)", line=dict(width=0)),
+        text=["San Juan Chamula"],
+        textposition="top center",
+        textfont=dict(size=11, color="#ff9999", family="Arial Black"),
+        hovertext=["<b>San Juan Chamula</b><br>Pobreza Total: 96.3%"
+                   "<br>Pobreza Extrema: 52.3%<br>CVEGEO: 07023"],
+        hoverinfo="text",
+        showlegend=False,
+    ))
+
+    fig.update_layout(
+        height=None, autosize=True,
+        template="plotly_dark",
+        margin=dict(t=5, b=5, l=0, r=0),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        geo=dict(bgcolor="rgba(0,0,0,0)"),
+        coloraxis_showscale=False,
+    )
+    return fig
+
+# ═══════════════════════════════════════════════════════════════════════
+# HELPER: ODS indicator bar — one bold colored bar per ODS + national ref
+# ═══════════════════════════════════════════════════════════════════════
+def make_ods_comparison_bar():
+    # Per-ODS palette matching the reference image style
+    ODS_COLORS  = ["#FF3131", "#3b82f6", "#a855f7", "#f97316"]
+    ods_labels  = ["ODS 1<br>Pobreza", "ODS 4<br>Educación",
+                   "ODS 5<br>Género",  "ODS 8<br>Trabajo"]
+    chamula_vals = [52.3, 55.3, 91.7, 76.9]
+    nacional_vals = [
+        data_ods1["nacional"] if data_ods1 and data_ods1.get("nacional") else None,
+        data_ods4["nacional"] if data_ods4 and data_ods4.get("nacional") else None,
+        data_ods5["nacional"] if data_ods5 and data_ods5.get("nacional") else None,
+        data_ods8["nacional"] if data_ods8 and data_ods8.get("nacional") else None,
+    ]
+
+    fig = go.Figure()
+
+    # One bold colored bar per ODS
+    for label, val, color in zip(ods_labels, chamula_vals, ODS_COLORS):
+        fig.add_trace(go.Bar(
+            x=[label], y=[val],
+            marker=dict(
+                color=color,
+                opacity=0.88,
+                line=dict(width=0),
+            ),
+            text=[f"<b>{val:.1f}%</b>"],
+            textposition="outside",
+            textfont=dict(color=color, size=13, family="Arial Black"),
+            hovertemplate=f"<b>{label.replace('<br>',' ')}</b><br>"
+                          f"Chamula: {val}%<extra></extra>",
+            showlegend=False,
+        ))
+
+    # National average as small white/gray markers on top of each bar
+    nac_x, nac_y = [], []
+    for label, nac in zip(ods_labels, nacional_vals):
+        if nac is not None:
+            nac_x.append(label)
+            nac_y.append(nac)
+
+    if nac_x:
+        fig.add_trace(go.Scatter(
+            x=nac_x, y=nac_y,
+            mode="markers+text",
+            marker=dict(
+                symbol="line-ew",
+                size=22,
+                color="rgba(255,255,255,0.7)",
+                line=dict(color="rgba(255,255,255,0.7)", width=3),
+            ),
+            text=[f"{v:.1f}%" for v in nac_y],
+            textposition="top center",
+            textfont=dict(color="rgba(200,220,240,0.75)", size=10),
+            name="Promedio Nacional",
+            hovertemplate="Nacional: %{y:.1f}%<extra></extra>",
+        ))
+
+    fig.update_layout(
+        showlegend=True,
+        legend=dict(
+            orientation="h", y=-0.18, x=0.5, xanchor="center",
+            font=dict(size=10, color="#6a8aaa"),
+        ),
+        template="plotly_dark",
+        height=None, autosize=True,
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        margin=dict(t=25, b=10, l=10, r=10),
+        bargap=0.38,
+        yaxis=dict(
+            title=None,
+            range=[0, 115],
+            gridcolor="#141e30",
+            zeroline=False,
+            tickfont=dict(color="#3a5a70", size=10),
+        ),
+        xaxis=dict(
+            tickfont=dict(size=11, color="#8aa8c8"),
+            showgrid=False,
+        ),
+    )
+    return fig
+
+# ═══════════════════════════════════════════════════════════════════════
+# HELPER: Brecha gauge (0-5x ratio) — used in ODS 1/4/5/8 pages
+# ═══════════════════════════════════════════════════════════════════════
 def make_gauge(data, title_suffix=""):
     brecha = data.get("brecha") if data else None
     if brecha is None:
         return go.Figure()
-    color = "#dc3545" if brecha > 2 else "#fd7e14" if brecha > 1.5 else "#198754"
+    color = NEON_RED if brecha > 2 else NEON_ORANGE if brecha > 1.5 else HEAL_GREEN
+    # Gradient arc steps for the brecha gauge
+    brecha_steps = [
+        dict(range=[0,   0.5], color="rgba(57,255,20,0.08)"),
+        dict(range=[0.5, 1.0], color="rgba(57,255,20,0.18)"),
+        dict(range=[1.0, 1.5], color="rgba(255,215,0,0.12)"),
+        dict(range=[1.5, 2.0], color="rgba(255,215,0,0.22)"),
+        dict(range=[2.0, 3.5], color="rgba(255,107,0,0.20)"),
+        dict(range=[3.5, 5.0], color="rgba(255,49,49,0.28)"),
+    ]
     fig = go.Figure(go.Indicator(
         mode="gauge+number",
         value=brecha,
-        number=dict(suffix="x", font=dict(size=40)),
-        title=dict(text=f"Brecha Chamula vs Nacional", font=dict(size=14)),
+        number=dict(
+            suffix="x",
+            font=dict(size=44, color=color, family="Arial Black"),
+        ),
+        title=dict(
+            text="Brecha Chamula vs Nacional",
+            font=dict(size=12, color="#6a8aaa"),
+        ),
         gauge=dict(
-            axis=dict(range=[0, 5], tickwidth=1),
-            bar=dict(color=color),
-            bgcolor="white",
-            steps=[
-                dict(range=[0, 1], color="#d4edda"),
-                dict(range=[1, 2], color="#fff3cd"),
-                dict(range=[2, 5], color="#f8d7da"),
-            ],
-            threshold=dict(line=dict(color="red", width=3), thickness=0.8, value=brecha),
+            axis=dict(
+                range=[0, 5],
+                tickwidth=1, tickcolor="#1e3050",
+                tickvals=[0, 1, 2, 3, 4, 5],
+                ticktext=["0", "1x", "2x", "3x", "4x", "5x"],
+                tickfont=dict(color="#3a5a70", size=10),
+            ),
+            bar=dict(color=color, thickness=0.36),
+            bgcolor="rgba(0,0,0,0)",
+            borderwidth=0,
+            steps=brecha_steps,
+            threshold=dict(
+                line=dict(color="#ffffff", width=3),
+                thickness=0.92,
+                value=brecha,
+            ),
         )
     ))
-    fig.update_layout(height=None, autosize=True, margin=dict(t=40, b=10, l=20, r=20))
+    fig.update_layout(
+        height=None, autosize=True,
+        template="plotly_dark",
+        margin=dict(t=45, b=10, l=20, r=20),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+    )
     return fig
 
-# ── Helper: Horizontal comparison bar ──────────────────────────────
+# ═══════════════════════════════════════════════════════════════════════
+# HELPER: Horizontal comparison bar — used in ODS 1/4/5/8 pages
+# ═══════════════════════════════════════════════════════════════════════
 def make_comparison(data, indicator_name="Indicador"):
     if not data:
         return go.Figure()
 
-    niveles = []
-    valores = []
-    colors = []
-    color_map = {"Chamula": "#dc3545", "México": "#fd7e14", "LATAM": "#0dcaf0", "Mundo": "#198754"}
+    niveles, valores, colors = [], [], []
+    color_map = {
+        "Chamula": NEON_RED,
+        "México":  NEON_ORANGE,
+        "LATAM":   "#00D4FF",
+        "Mundo":   HEAL_GREEN,
+    }
 
     for key, label in [("world","Mundo"),("latam","LATAM"),("nacional","México"),("chamula","Chamula")]:
         if data.get(key) is not None:
@@ -80,19 +481,23 @@ def make_comparison(data, indicator_name="Indicador"):
         marker_color=colors,
         text=[f"<b>{v:.1f}%</b>" for v in valores],
         textposition="outside",
-        textfont=dict(size=14),
+        textfont=dict(size=14, color="#ffffff"),
     ))
     fig.update_layout(
         xaxis_title=indicator_name,
         height=None, autosize=True,
-        template="plotly_white",
-        margin=dict(t=10, b=30, l=10, r=50),
-        xaxis=dict(showgrid=True, gridcolor="#eee"),
-        yaxis=dict(tickfont=dict(size=14, family="Arial Black")),
+        template="plotly_dark",
+        margin=dict(t=10, b=30, l=10, r=60),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        xaxis=dict(showgrid=True, gridcolor="#2d3748"),
+        yaxis=dict(tickfont=dict(size=14, family="Arial Black", color="#e2e8f0")),
     )
     return fig
 
-# ── Helper: Donut showing Chamula vs rest ──────────────────────────
+# ═══════════════════════════════════════════════════════════════════════
+# HELPER: Donut showing Chamula vs rest — used in ODS 1/4/5/8 pages
+# ═══════════════════════════════════════════════════════════════════════
 def make_donut(chamula_val, label="Pobreza Extrema"):
     if chamula_val is None:
         return go.Figure()
@@ -101,27 +506,105 @@ def make_donut(chamula_val, label="Pobreza Extrema"):
         labels=[label, "Resto de la población"],
         values=[chamula_val, rest],
         hole=0.6,
-        marker=dict(colors=["#dc3545", "#dee2e6"]),
+        marker=dict(colors=[NEON_RED, "#1e2a3a"]),
         textinfo="percent+label",
         textposition="inside",
-        textfont=dict(size=13, family="Arial Black"),
+        textfont=dict(size=13, family="Arial Black", color="#ffffff"),
         insidetextorientation="horizontal",
         hoverinfo="label+value+percent",
     ))
     fig.add_annotation(
         text=f"<b>{chamula_val:.1f}%</b>", x=0.5, y=0.5,
-        font=dict(size=24, color="#dc3545"), showarrow=False,
+        font=dict(size=24, color=NEON_RED), showarrow=False,
     )
     fig.update_layout(
         height=None, autosize=True,
+        template="plotly_dark",
         margin=dict(t=10, b=10, l=10, r=10),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
         showlegend=True,
-        legend=dict(orientation="h", yanchor="bottom", y=-0.15, x=0.5, xanchor="center", font=dict(size=13)),
+        legend=dict(
+            orientation="h", yanchor="bottom", y=-0.15, x=0.5,
+            xanchor="center", font=dict(size=13, color="#cccccc"),
+        ),
     )
     return fig
 ```
 
-# ODS 1 — Pobreza
+# Inicio {icon="bi-speedometer2"}
+
+## Row {height=35%}
+
+### Column {width=33% .gauge-card-red}
+
+```{python}
+#| title: "Pobreza Total en Chamula"
+make_poverty_gauge(POBREZA_TOTAL, "Pobreza Total en Chamula", NEON_RED)
+```
+
+### Column {width=33% .gauge-card-orange}
+
+```{python}
+#| title: "Pobreza Extrema en Chamula"
+make_poverty_gauge(POBREZA_EXTREMA, "Pobreza Extrema en Chamula", NEON_ORANGE)
+```
+
+### Column {width=34% .gauge-card-yellow}
+
+```{python}
+#| title: "Pobreza Moderada (Alta)"
+make_poverty_gauge(POBREZA_MODERADA, "Pobreza Moderada en Chamula", ALERT_YEL)
+```
+
+## Row {height=40%}
+
+### Column {width=55% .map-panel}
+
+```{python}
+#| title: "Ubicación: San Juan Chamula, Chiapas, México"
+make_chamula_map()
+```
+
+### Column {width=45%}
+
+```{python}
+#| title: "Diagnóstico ODS: Chamula vs Promedio Nacional"
+make_ods_comparison_bar()
+```
+
+## Row {height=25%}
+
+### Column
+
+```{python}
+#| output: asis
+display(HTML('''
+<div class="cta-card">
+  <div class="cta-card__inner">
+    <div class="cta-card__header">
+      <img src="empoderando-logo.png" class="cta-card__logo" alt="Empoderando Arte logo" />
+      <div class="cta-card__brand">&#9670; Empoderando Arte &#9670;</div>
+    </div>
+    <div class="cta-card__divider"></div>
+    <p class="cta-card__mission">
+      Una plataforma de arte, cultura y econom&#237;a creativa que empodera a mujeres Tsotsil
+      de San Juan Chamula &mdash; reconociendo su trabajo artesanal y abriendo acceso
+      a mercados justos.
+    </p>
+    <div class="cta-card__ods">
+      <span class="ods-badge">ODS 1 &middot; Pobreza</span>
+      <span class="ods-badge">ODS 4 &middot; Educaci&#243;n</span>
+      <span class="ods-badge">ODS 5 &middot; G&#233;nero</span>
+      <span class="ods-badge">ODS 8 &middot; Trabajo</span>
+    </div>
+    <a href="#" class="neon-button">Aplicar Apoyo Social</a>
+  </div>
+</div>
+'''))
+```
+
+# ODS 1 — Pobreza {icon="bi-house-fill"}
 
 ## Row {height=25%}
 
@@ -227,7 +710,7 @@ display(HTML('''
 '''))
 ```
 
-# ODS 4 — Educación
+# ODS 4 — Educación {icon="bi-book-fill"}
 
 ## Row {height=25%}
 
@@ -299,7 +782,7 @@ make_comparison(data_ods4, "Rezago Educativo (%)")
 make_gauge(data_ods4)
 ```
 
-# ODS 5 — Género
+# ODS 5 — Género {icon="bi-gender-female"}
 
 ## Row {height=25%}
 
@@ -371,7 +854,7 @@ make_comparison(data_ods5, "Indicador de Género (%)")
 make_gauge(data_ods5)
 ```
 
-# ODS 8 — Trabajo
+# ODS 8 — Trabajo {icon="bi-briefcase-fill"}
 
 ## Row {height=25%}
 
@@ -443,7 +926,7 @@ make_comparison(data_ods8, "Trabajo Decente (%)")
 make_gauge(data_ods8)
 ```
 
-# Resumen
+# Resumen {icon="bi-bar-chart-fill"}
 
 ## Row {height=50%}
 
@@ -470,27 +953,38 @@ fig_radar = go.Figure()
 fig_radar.add_trace(go.Scatterpolar(
     r=chamula_vals + [chamula_vals[0]],
     theta=categories + [categories[0]],
-    fill="toself", fillcolor="rgba(220,53,69,0.2)",
-    line=dict(color="#dc3545", width=3),
+    fill="toself", fillcolor="rgba(255,49,49,0.22)",
+    line=dict(color=NEON_RED, width=3),
     name="Chamula",
     text=[f"{v:.1f}%" for v in chamula_vals] + [f"{chamula_vals[0]:.1f}%"],
 ))
 fig_radar.add_trace(go.Scatterpolar(
     r=nacional_vals + [nacional_vals[0]],
     theta=categories + [categories[0]],
-    fill="toself", fillcolor="rgba(253,126,20,0.15)",
-    line=dict(color="#fd7e14", width=3, dash="dash"),
+    fill="toself", fillcolor="rgba(57,255,20,0.12)",
+    line=dict(color=HEAL_GREEN, width=3, dash="dash"),
     name="Promedio Nacional",
     text=[f"{v:.1f}%" for v in nacional_vals] + [f"{nacional_vals[0]:.1f}%"],
 ))
 fig_radar.update_layout(
     polar=dict(
-        radialaxis=dict(visible=True, range=[0, 100], showline=False, gridcolor="#eee"),
-        angularaxis=dict(tickfont=dict(size=13)),
+        radialaxis=dict(
+            visible=True, range=[0, 100],
+            showline=False, gridcolor="#2d3748",
+            tickfont=dict(color="#888"),
+        ),
+        angularaxis=dict(tickfont=dict(size=13, color="#cccccc")),
+        bgcolor="rgba(0,0,0,0)",
     ),
     showlegend=True,
-    legend=dict(orientation="h", yanchor="bottom", y=-0.2, x=0.5, xanchor="center", font=dict(size=13)),
+    legend=dict(
+        orientation="h", yanchor="bottom", y=-0.2, x=0.5,
+        xanchor="center", font=dict(size=13, color="#cccccc"),
+    ),
     height=None, autosize=True,
+    template="plotly_dark",
+    paper_bgcolor="rgba(0,0,0,0)",
+    plot_bgcolor="rgba(0,0,0,0)",
     margin=dict(t=20, b=40, l=40, r=40),
 )
 fig_radar.show()
@@ -508,7 +1002,7 @@ brechas = [
     data_ods5["brecha"] if data_ods5 and data_ods5.get("brecha") else 0,
     data_ods8["brecha"] if data_ods8 and data_ods8.get("brecha") else 0,
 ]
-bar_colors = ["#dc3545" if b > 2 else "#fd7e14" if b > 1.5 else "#198754" for b in brechas]
+bar_colors = [NEON_RED if b > 2 else NEON_ORANGE if b > 1.5 else HEAL_GREEN for b in brechas]
 
 fig_summary = go.Figure()
 fig_summary.add_trace(go.Bar(
@@ -516,30 +1010,35 @@ fig_summary.add_trace(go.Bar(
     marker_color=bar_colors,
     text=[f"<b>{b:.1f}x</b>" for b in brechas],
     textposition="outside",
-    textfont=dict(size=16),
+    textfont=dict(size=16, color="#ffffff"),
 ))
-# Reference line at 1.0
-fig_summary.add_hline(y=1.0, line_dash="dash", line_color="#999",
-                       annotation_text="Promedio nacional = 1.0x",
-                       annotation_position="top right")
+fig_summary.add_hline(
+    y=1.0, line_dash="dash", line_color="#555",
+    annotation_text="Promedio nacional = 1.0x",
+    annotation_position="top right",
+    annotation_font_color="#888",
+)
 fig_summary.update_layout(
     yaxis_title="Brecha (veces peor que el promedio nacional)",
     height=None, autosize=True,
-    template="plotly_white",
+    template="plotly_dark",
+    paper_bgcolor="rgba(0,0,0,0)",
+    plot_bgcolor="rgba(0,0,0,0)",
     margin=dict(t=20, b=30),
-    xaxis=dict(tickfont=dict(size=13)),
+    xaxis=dict(tickfont=dict(size=13, color="#cccccc")),
+    yaxis=dict(gridcolor="#2d3748"),
 )
 fig_summary.show()
 ```
 
-# Auditoría {scrolling="true"}
+# Auditoría {scrolling="true" icon="bi-shield-check"}
 
 ## Row
 
 ```{python}
 #| title: "Panel de Auditoría — Trazabilidad de Datos"
 
-audit_html = '<p style="font-size:1.05em;"><em>Cada número en este tablero es rastreable hasta su fuente original. Ningún dato fue inventado o hardcodeado.</em></p>'
+audit_html = '<p style="font-size:1.05em;color:#9ca3af;"><em>Cada número en este tablero es rastreable hasta su fuente original. Ningún dato fue inventado o hardcodeado.</em></p>'
 
 for ods_key, data in [("ODS1", data_ods1), ("ODS4", data_ods4), ("ODS5", data_ods5), ("ODS8", data_ods8)]:
     if data and data.get("fuentes"):
@@ -568,32 +1067,34 @@ display(HTML(audit_html))
 #| title: "Nota Metodológica"
 
 display(HTML('''
-<h4>Fuentes Oficiales</h4>
+<div style="color:#e2e8f0;">
+<h4 style="color:#e2e8f0;">Fuentes Oficiales</h4>
 <ul>
   <li><strong>CONEVAL</strong> — Consejo Nacional de Evaluación de la Política de Desarrollo Social.
     Base de Datos de Pobreza Municipal 2020.
-    <a href="https://www.coneval.org.mx/Medicion/Paginas/Pobreza-municipio-2010-2020.aspx" target="_blank">URL</a></li>
+    <a href="https://www.coneval.org.mx/Medicion/Paginas/Pobreza-municipio-2010-2020.aspx" target="_blank" style="color:#60a5fa;">URL</a></li>
   <li><strong>INEGI</strong> — Instituto Nacional de Estadística y Geografía.
     Censo de Población y Vivienda 2020 + API de Indicadores.
-    <a href="https://www.inegi.org.mx/programas/ccpv/2020/" target="_blank">URL</a></li>
+    <a href="https://www.inegi.org.mx/programas/ccpv/2020/" target="_blank" style="color:#60a5fa;">URL</a></li>
   <li><strong>Banco Mundial</strong> — World Development Indicators API v2.
     Fuente custodio designada por ONU para indicadores ODS.
-    <a href="https://data.worldbank.org/indicator" target="_blank">URL</a></li>
+    <a href="https://data.worldbank.org/indicator" target="_blank" style="color:#60a5fa;">URL</a></li>
   <li><strong>ONU</strong> — División de Estadística. Indicadores de los ODS.
-    <a href="https://unstats.un.org/sdgs/" target="_blank">URL</a></li>
+    <a href="https://unstats.un.org/sdgs/" target="_blank" style="color:#60a5fa;">URL</a></li>
 </ul>
-<h4>Periodicidad</h4>
+<h4 style="color:#e2e8f0;">Periodicidad</h4>
 <ul>
   <li>CONEVAL: Bienal. Última actualización: datos 2020 (publicados diciembre 2021).</li>
   <li>INEGI: Variable según indicador. Censo cada 10 años.</li>
   <li>Banco Mundial: Anual. Datos rango 2018-2022.</li>
 </ul>
-<h4>Metodología Anti Cherry-Picking</h4>
+<h4 style="color:#e2e8f0;">Metodología Anti Cherry-Picking</h4>
 <p>Datos de Chamula (CVEGEO 07023) comparados contra promedio <strong>nacional</strong> de 2,469 municipios (CONEVAL),
 promedio <strong>LATAM</strong> (código LAC, Banco Mundial) y promedio <strong>mundial</strong> (código WLD, Banco Mundial).
 No se seleccionaron indicadores para favorecer ninguna narrativa.</p>
-<h4>Contexto Demográfico</h4>
+<h4 style="color:#e2e8f0;">Contexto Demográfico</h4>
 <p>San Juan Chamula, Chiapas: 102,970 habitantes. Población mayoritariamente indígena Tsotsil.
 487,898 hablantes Tsotsil en Chiapas, 38,124 mujeres en el municipio.</p>
+</div>
 '''))
 ```

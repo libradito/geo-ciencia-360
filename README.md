@@ -1,9 +1,39 @@
-# Geo-Ciencia 360
+#🌍Geo-Ciencia 360 — Empoderando Arte
+Más de **38,000 mujeres indígenas artesanas y campesinas** en San Juan Chamula, Chiapas, viven en una intersección crítica de pobreza, desigualdad y falta de acceso a educación y empleo digno.
 
-Dashboard interactivo que compara indicadores de **San Juan Chamula, Chiapas** contra promedios nacionales, regionales (LATAM) y mundiales, alineados a los Objetivos de Desarrollo Sostenible (ODS) 1, 4, 5 y 8.
-
-**Equipo HackODS UNAM 2026 — Empoderando Arte**
-
+Objetivo del proyecto.
+Evidenciar con un tablero de ciencia de datos, la realidad de los pueblos originarios de Mexico, para generar una propuesta de solución práctica, viable y replicable.
+Este proyecto cruza **más de dos años de evidencia de campo** con **ciencia de datos oficial y auditable** para visibilizar una brecha estructural profunda en los Objetivos de Desarrollo Sostenible:
+- **ODS 1 — Fin de la pobreza**
+- **ODS 4 — Educación de calidad**
+- **ODS 5 — Igualdad de género**
+- **ODS 8 — Trabajo decente y crecimiento económico**
+El resultado no es solo un diagnóstico; es una llamada urgente a la acción.
+---
+# 💡 De la evidencia en datos a la solución.
+Geo-Ciencia 360 no se detiene en mostrar el problema.
+Conecta directamente con una solución real, práctica, disruptiva, activa y replicable:
+## **Empoderando Arte** https://www.empoderandoarte.com/ 
+Una plataforma diseñada para que artesanas de pueblos originarios —incluso aquellas que no hablan español— puedan:
+- Comercializar sus productos en su **lengua materna**
+- Conectarse con clientes en **cualquier parte del mundo**
+- Romper barreras estructurales de acceso al mercado digital**
+- Vender sin intermediarios y obtener el pago justo por su trabajo**
+---
+### 🌐 Impacto escalable
+Este proyecto propone un modelo práctico y replicable que puede extenderse:
+- A nivel **regional (LATAM)**
+- A nivel **global**
+Contribuyendo directamente al cumplimiento de la **Agenda 2030 de los ODS**.
+---
+#### 🤝 Llamado a la acción
+Te invitamos a explorar, compartir y a sumarte para amplificar este proyecto.
+Porque detrás de cada dato, hay una historia y detrás de cada historia, hay una oportunidad de cambio.
+Apoyar este proyecto es contribuir a:
+- Reducir desigualdades estructurales  
+- Impulsar economías locales  
+- Construir un futuro más justo  
+---
 ## Estructura del Proyecto
 
 ```
@@ -42,7 +72,12 @@ source venv/bin/activate  # Linux/Mac
 pip install -r requirements.txt
 quarto render dashboard.qmd
 ```
+#####👥 Equipo
+**Geo-Ciencia 360 — mentes y manos en acción para crear un mundo mejor**
+- Daniel Bueno Córdoba — Líder  
+- Librado Hernandez Cruz — Tecnología  
+- Edith Liera Maciel — Finanzas 
 
-## Equipo
 
-Geo-Ciencia 360 — HackODS UNAM 2026 — Empoderando Arte
+
+
